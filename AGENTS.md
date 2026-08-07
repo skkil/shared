@@ -19,8 +19,9 @@ the upstream tools it extends (`eslint`, `tsc`, `actions/*`, `terraform`).
 
 `shared` holds the configuration and conventions that every repository in the
 skkil organization consumes. Lint and formatter rules, TypeScript bases,
-reusable CI workflows, Terraform modules, ADRs, and the org-wide half of the
-agent context.
+reusable CI workflows, Terraform modules, ADRs, the org-wide half of the agent
+context, and — as the one deliberate exception — copy-once starting-point
+templates for files GitHub itself gives no cross-repository reference for.
 
 It exists because the alternative is what `sync` already demonstrates: a
 `.eslintrc` and a `tsconfig.json` and a CI matrix that the second application
@@ -54,9 +55,9 @@ anything executable here.
 
 ## Current state
 
-**Empty.** This repository currently contains `README.md`, `AGENTS.md` and
-`CLAUDE.md` and nothing else. There are no packages, no workflows, no modules,
-and no release tags.
+This repository contains `README.md`, `AGENTS.md`, `CLAUDE.md`, and
+`templates/` — the one exception to "reference, never copy," explained below.
+Nothing else yet: no packages, no workflows, no modules, and no release tags.
 
 Do not document, reference, or write code against anything not in the left
 column — it does not exist yet.
@@ -64,14 +65,14 @@ column — it does not exist yet.
 | Exists                      | Does not exist yet                              |
 | --------------------------- | ----------------------------------------------- |
 | `README.md`, `AGENTS.md`, `CLAUDE.md` | Any published package                 |
-| The admission test, below   | Reusable workflows (`.github/workflows/`)       |
-| The versioning policy, below | Shared agent context (`agents/`)               |
-| The layout plan, below      | ADRs (`docs/adr/`)                              |
-|                             | Terraform modules, k8s bases                    |
-|                             | Any consumer — no repo points here yet          |
+| `templates/` — see "The `templates/` exception" | Reusable workflows (`.github/workflows/`) |
+| The admission test, below   | Shared agent context (`agents/`)                |
+| The versioning policy, below | ADRs (`docs/adr/`)                             |
+| The layout plan, below      | Terraform modules, k8s bases                    |
 
-The first thing to land is whatever has two real consumers. Nothing does yet
-except lint and formatter config, which is the agreed starting point.
+The first thing to land as referenced infrastructure is whatever has two real
+consumers. Nothing does yet except lint and formatter config, which is the
+agreed starting point. `templates/` is exempt from that bar — see below.
 
 ---
 
@@ -107,9 +108,46 @@ belong in this repository yet. Add the mechanism first.
 
 ---
 
+## The `templates/` exception
+
+Everything above assumes an artifact has a resolver — `extends`, `uses`,
+`source`. `templates/` exists for the files that do not: GitHub gives every
+repository its own `.github/pull_request_template.md`, `ISSUE_TEMPLATE/`, and
+`copilot-instructions.md`, and provides no mechanism for one repository to
+reference another's. The only native alternative is an org-wide `.github`
+repository serving org-wide defaults, which is a different mechanism entirely
+and one this organization has not adopted.
+
+`skkil templates install` (`github.com/skkil/skkil`) shallow-clones this
+repository and copies each file a consuming `skkil.yml` declares under
+`templates.files` into that repository's root. Once copied, the file belongs
+to the consuming repository — there is no version pin, no re-sync, and
+divergence afterward is expected, not a defect. That is the opposite of every
+other artifact here, which is exactly why it is scoped this narrowly:
+
+- **Only for files with no reference mechanism.** The day GitHub (or any other
+  tool) grows one for something currently in `templates/`, that mechanism
+  wins and the file moves out. `.github/workflows/` content never belongs in
+  `templates/` — reusable workflows already have `uses:`, and copying a
+  workflow file instead is the exact anti-pattern this repository exists to
+  remove.
+- **Not subject to the two-consumer bar.** A bad addition to referenced
+  infrastructure costs every consumer at once — a wrong workflow version
+  breaks every build that pins it. A bad template costs nothing beyond an
+  unused file sitting here; no repository is forced to adopt it. `templates/`
+  can hold a repository's first real example of something, not only patterns
+  already duplicated twice.
+- **Not tag-pinned.** `skkil templates install` always installs from this
+  repository's default branch. That decision — no `ref` field, no caching —
+  lives in `skkil`'s own `docs/config/v1/example.yml`; do not add a version
+  knob here to compensate for it.
+
+---
+
 ## Versioning
 
-**Tag releases. Consumers pin tags. Never `@main`.**
+**Tag releases. Consumers pin tags. Never `@main`.** `templates/` is the one
+exception, by design — see "The `templates/` exception" above.
 
 A repository consumed at `@main` means any push to this repository changes every
 downstream build simultaneously — which is precisely the coupling the repository
@@ -168,6 +206,7 @@ Directories are created when their first real artifact lands, not in advance.
 An empty directory with a `.gitkeep` is a promise this repository cannot keep.
 
 ```
+templates/           files skkil templates install copies into a consuming repo, once
 packages/            published npm packages — eslint-config, prettier-config, tsconfig
 .github/workflows/   reusable workflows, called with workflow_call
 .github/actions/     composite actions
@@ -186,8 +225,14 @@ Every addition should name the repositories that will resolve it. Today:
 | ----------------------------- | ------------------------------ | ----------------------------- |
 | `skkil` (`skkil/skkil`)       | Go 1.26, cobra, GoReleaser     | CI workflows, agent context, ADRs |
 | `sync` (`skkil/sync`)         | Java 25 / Spring, Next.js, pnpm | Everything                   |
+| `tabs` (`skkil/tabs`)         | Java 26 / Spring, Flutter      | `templates/`, eventually everything else |
 
-Two repositories, one of which is tooling rather than a product. The shared
+`templates/`'s current PR template, issue templates and Copilot instructions
+were generalized from `sync`'s `.github/`, which already had them. `tabs` and
+`clip` have no `.github/` yet and are the intended next consumers via
+`skkil templates install`.
+
+Three repositories, one of which is tooling rather than a product. The shared
 surface is genuinely thin right now — CI, agent context, documentation
 conventions, and the lint and formatter rules that motivated this repository.
 
@@ -221,7 +266,7 @@ against platforms that do not exist.
 
 |             |                                                        |
 | ----------- | ------------------------------------------------------ |
-| Consumers   | `skkil/skkil` (Go), `skkil/sync` (Spring + Next.js)    |
-| Publishes   | npm packages, reusable workflows, composite actions    |
+| Consumers   | `skkil/skkil` (Go), `skkil/sync` (Spring + Next.js), `skkil/tabs` (Spring + Flutter) |
+| Publishes   | npm packages, reusable workflows, composite actions, `templates/` (copy-once) |
 | Versioning  | Git tags; consumers pin, never `@main`                 |
 | Companion   | `skkil` CLI — control plane to this repository's data  |

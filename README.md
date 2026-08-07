@@ -34,6 +34,22 @@ module "vpc" {
 }
 ```
 
+### 예외: `templates/`
+
+GitHub는 `.github/pull_request_template.md`, `ISSUE_TEMPLATE/`,
+`copilot-instructions.md` 같은 파일에 대해 다른 저장소를 참조하는 방법을
+제공하지 않습니다. 조직 전체에 적용되는 `.github` 특수 저장소를 쓰는 방법도
+있지만, 이 조직은 그 방식을 택하지 않았습니다.
+
+그래서 `templates/`만은 예외적으로 복사를 지원합니다. `skkil templates
+install`([`skkil`](https://github.com/skkil/skkil))이 이 저장소를 얕게
+clone하여 `skkil.yml`의 `templates.files`에 선언된 파일을 그대로 복사해
+옵니다. 복사된 파일은 그 순간부터 가져간 저장소의 소유이며, 버전 고정도
+재동기화도 없습니다 — 시간이 지나며 갈라지는 것이 의도된 동작입니다. 이
+저장소의 다른 모든 산출물과 정반대이기 때문에, 적용 범위를 `.github/workflows/`
+처럼 참조 메커니즘이 이미 있는 파일로 넓히지 않습니다. 자세한 기준은
+[`AGENTS.md`](AGENTS.md)의 "The `templates/` exception"을 참고하세요.
+
 ## `skkil` CLI와의 관계
 
 [`skkil`](https://github.com/skkil/skkil)은 조직 공통 개발 도구이고, 이 저장소는
@@ -50,11 +66,13 @@ module "vpc" {
 
 ## 현재 상태
 
-**비어 있습니다.** 현재 이 저장소에는 `README.md`, `AGENTS.md`, `CLAUDE.md`만
-있습니다. 배포된 패키지도, 워크플로도, 릴리스 태그도 아직 없습니다.
+이 저장소에는 `README.md`, `AGENTS.md`, `CLAUDE.md`, 그리고 `templates/`가
+있습니다. `templates/`는 위에서 설명한 유일한 예외이고, 그 외에는 아직
+없습니다 — 배포된 패키지도, 워크플로도, 릴리스 태그도 없습니다.
 
-가장 먼저 들어올 것은 실제로 두 곳 이상에서 쓰이는 항목이며, 합의된 시작점은
-린트·포매터 설정입니다.
+참조로 소비되는 인프라 중 가장 먼저 들어올 것은 실제로 두 곳 이상에서 쓰이는
+항목이며, 합의된 시작점은 린트·포매터 설정입니다. `templates/`는 이 기준에서
+예외입니다.
 
 ## 무엇을 넣을지 판단하는 기준
 
@@ -73,7 +91,8 @@ module "vpc" {
 ## 버전 정책
 
 **태그로 릴리스하고, 사용하는 쪽은 태그를 고정합니다. `@main`은 사용하지
-않습니다.**
+않습니다.** `templates/`는 설계상 유일한 예외입니다 — 위 "예외: `templates/`"
+참고.
 
 `@main`을 참조하면 이 저장소에 푸시가 일어날 때마다 모든 하위 저장소의 빌드가
 동시에 바뀝니다. 이 저장소가 없애려고 했던 결합이 그대로 되살아납니다.
@@ -92,9 +111,12 @@ module "vpc" {
 | ----------------------------------------------- | ------------------------------- |
 | [`skkil`](https://github.com/skkil/skkil)       | Go 1.26, cobra, GoReleaser      |
 | [`sync`](https://github.com/skkil/sync)         | Java 25 · Spring, Next.js, pnpm |
+| [`tabs`](https://github.com/skkil/tabs)         | Java 26 · Spring, Flutter       |
 
 새 항목을 추가하는 PR은 그것을 사용할 저장소를 함께 밝힙니다. 사용하는 곳이 없는
-설정은 추가하지 않습니다.
+설정은 추가하지 않습니다. `templates/`의 PR 템플릿, 이슈 템플릿, Copilot
+instructions는 이미 이것들을 갖고 있던 `sync`의 `.github/`를 일반화한 것이고,
+`.github/`가 아직 없는 `tabs`와 `clip`이 다음으로 가져갈 대상입니다.
 
 ## 기여
 
