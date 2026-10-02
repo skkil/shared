@@ -1,0 +1,12 @@
+# Creative brief: <surface or campaign>
+- **Surface + mode:** (landing = Persuade, app screen = Operate, docs = Read, showcase/game = Experience, marketing asset/video)
+- **Platform(s):**
+- **Audience + scene:** who, where, device, light, mood, what they were doing a minute before
+- **Problem (3-5 alternative framings considered, chosen one):**
+- **User promise (one sentence the surface must deliver):**
+- **Desired action / task:**
+- **Proof available (real only):**
+- **Constraints:** brand assets, must-keep elements, tech stack, deadlines, budget for generated assets ($)
+- **Success looks like:** (metric or observable behavior)
+- **What would make a polished result feel wrong:**
+- **Deliverables:** (see discovery.md deliverables map)

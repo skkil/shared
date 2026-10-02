@@ -1,0 +1,13 @@
+{
+  "name": "skkil",
+  "version": "0.1.0",
+  "description": "Agent skills shared across the skkil organization.",
+  "author": {
+    "name": "Hyoungjoo Jin",
+    "url": "https://github.com/hyoungjoojin"
+  },
+  "homepage": "https://github.com/skkil/shared",
+  "repository": "https://github.com/skkil/shared",
+  "license": "UNLICENSED",
+  "keywords": ["skkil", "skills"]
+}

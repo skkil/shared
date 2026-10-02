@@ -50,6 +50,129 @@ clone하여 `skkil.yml`의 `templates.files`에 선언된 파일을 그대로 �
 처럼 참조 메커니즘이 이미 있는 파일로 넓히지 않습니다. 자세한 기준은
 [`AGENTS.md`](AGENTS.md)의 "The `templates/` exception"을 참고하세요.
 
+## 에이전트 스킬
+
+`skills/`의 스킬은 Claude Code 플러그인으로 배포됩니다. 이 저장소 전체가
+플러그인 하나(`skkil`)이자 그 플러그인의 마켓플레이스(`skkil`)이며, 설치 ID는
+`skkil@skkil`입니다. 마켓플레이스가 이 저장소를 가리키는 참조 메커니즘이므로
+"복사하지 않고 참조한다"는 원칙을 그대로 따릅니다.
+
+### 제공하는 스킬
+
+| 스킬 | 호출 | 설명 |
+| --- | --- | --- |
+| `rebecca` | `/skkil:rebecca` | 리드 디자이너. 제품 이해, UI/UX, 브랜드, 모션, 에셋 생성, 디자인 리뷰 |
+
+플러그인 스킬의 정식 호출은 `/skkil:<스킬>`입니다. Claude Code 2.1.280에서는
+이름이 겹치지 않으면 `/rebecca`처럼 접두어 없이도 호출됩니다. 다만 이 동작은
+버전마다 달랐으므로 문서와 스크립트에는 `/skkil:<스킬>`을 씁니다.
+
+### 설치
+
+[`skkil`](https://github.com/skkil/skkil) CLI로 설치합니다.
+
+```bash
+skkil skills install    # 마켓플레이스 등록 + 플러그인 설치. 다시 실행해도 변화 없음
+skkil skills doctor     # 설치 상태와 문제 해결 방법 확인
+```
+
+`skkil` 없이 직접 설치할 수도 있습니다. Claude Code 세션 안에서는 다음과 같이
+실행합니다.
+
+```text
+/plugin marketplace add skkil/shared
+/plugin install skkil@skkil
+```
+
+터미널에서는 다음 명령어를 씁니다.
+
+```bash
+claude plugin marketplace add skkil/shared
+claude plugin install skkil@skkil
+```
+
+### 프로젝트 단위로 켜기
+
+저장소에 아래 설정을 커밋하면, 그 폴더를 신뢰(trust)한 팀원에게 플러그인이
+설치됩니다. `skkil skills enable`이 기존 키를 보존하며 이 내용을 병합해 줍니다.
+
+```json
+// .claude/settings.json
+{
+  "extraKnownMarketplaces": {
+    "skkil": {
+      "source": { "source": "github", "repo": "skkil/shared" },
+      "autoUpdate": true
+    }
+  },
+  "enabledPlugins": {
+    "skkil@skkil": true
+  }
+}
+```
+
+### 업데이트 방식
+
+- 버전은 `.claude-plugin/plugin.json`의 `version` 하나로만 관리합니다. Claude
+  Code는 이 값이 바뀔 때만 업데이트로 인식하므로, `templates/`만 바뀐 커밋은
+  업데이트를 일으키지 않습니다.
+- Anthropic 공식 마켓플레이스가 아닌 마켓플레이스는 **자동 업데이트가 기본으로
+  꺼져** 있습니다. `/plugin` → Marketplaces → `skkil` → Enable auto-update로
+  켭니다. 위의 프로젝트 설정을 쓰는 저장소에서는 `"autoUpdate": true`로 켜집니다.
+- 수동으로는 `skkil skills update` 또는 `/plugin marketplace update skkil`을
+  실행합니다. 새 버전은 Claude Code를 다시 시작하면 적용됩니다.
+
+### claude.ai에서 쓰기
+
+`skills-v<버전>` 태그마다 GitHub Release에 스킬별 `<스킬>-<버전>.skill` 파일이
+올라갑니다. 이 파일을 claude.ai의 스킬 설정에서 업로드합니다. 직접 만들려면
+`skkil skills pack --all`을 실행합니다.
+
+### 다른 에이전트
+
+마켓플레이스 기능이 없는 에이전트에는 `skkil`이 스킬 폴더를 복사하고
+`.skkil-skill.json`으로 버전과 파일 해시를 기록합니다.
+
+```bash
+skkil skills install --agent cursor                    # ~/.cursor/skills
+skkil skills install --agent copilot --scope project   # .github/skills
+skkil skills update --agent cursor
+```
+
+| `--agent` | 프로젝트 폴더 | 사용자 폴더 |
+| --- | --- | --- |
+| `cursor` | `.cursor/skills/` | `~/.cursor/skills/` |
+| `copilot` | `.github/skills/` | `~/.copilot/skills/` |
+| `windsurf` | `.windsurf/skills/` | `~/.codeium/windsurf/skills/` |
+| `opencode` | `.opencode/skills/` | `~/.config/opencode/skills/` |
+| `codex` | `.agents/skills/` | `~/.agents/skills/` |
+| `agents` (Amp, goose, Zed 등) | `.agents/skills/` | `~/.agents/skills/` |
+
+Cursor, Copilot, OpenCode, Amp는 `.agents/skills/`와 `~/.claude/skills/`도
+읽습니다. 같은 스킬을 한 에이전트가 읽는 폴더 두 곳에 설치하지 마세요.
+[`npx skills add skkil/shared`](https://github.com/vercel-labs/skills)도 이
+구조를 인식합니다(로컬 체크아웃으로 `rebecca`만 발견되는 것을 확인했습니다).
+다만 이 방식은 마커를 남기지 않으므로 `skkil skills update`로 관리되지 않습니다.
+
+### 문제 해결
+
+- **이름 충돌**: `~/.claude/skills/`나 프로젝트의 `.claude/skills/`에 같은
+  이름의 스킬이 있으면 그쪽이 플러그인보다 우선합니다. `skkil skills doctor`가
+  찾아 줍니다. 복사본을 지우고 `/skkil:<스킬>`을 쓰세요.
+- **업데이트가 안 들어올 때**: 자동 업데이트가 켜져 있는지 확인하고
+  `skkil skills update`를 실행한 뒤 Claude Code를 다시 시작합니다.
+- **저장소가 비공개로 바뀐 경우**: 각 사용자에게 읽기 권한이 필요합니다. Claude
+  Code는 저장된 자격 증명으로 clone하며 프롬프트를 띄우지 않으므로,
+  `gh auth setup-git`이나 ssh-agent에 등록된 SSH 키로
+  `git ls-remote https://github.com/skkil/shared.git`이 프롬프트 없이 성공해야
+  합니다.
+- **조직 전체 배포(관리자)**: Claude Team · Enterprise의 Owner가 서버 관리
+  설정이나 claude.ai 조직 설정 > Plugins & skills에서 이 마켓플레이스를 모든
+  구성원에게 지정할 수 있습니다. 이 저장소는 그 설정을 바꾸지 않습니다.
+
+스킬을 추가하거나 고치는 방법은 [`skills/README.md`](skills/README.md)를
+참고하세요.
+
 ## `skkil` CLI와의 관계
 
 [`skkil`](https://github.com/skkil/skkil)은 조직 공통 개발 도구이고, 이 저장소는
@@ -66,9 +189,10 @@ clone하여 `skkil.yml`의 `templates.files`에 선언된 파일을 그대로 �
 
 ## 현재 상태
 
-이 저장소에는 `README.md`, `AGENTS.md`, `CLAUDE.md`, 그리고 `templates/`가
-있습니다. `templates/`는 위에서 설명한 유일한 예외이고, 그 외에는 아직
-없습니다 — 배포된 패키지도, 워크플로도, 릴리스 태그도 없습니다.
+이 저장소에는 `README.md`, `AGENTS.md`, `CLAUDE.md`, `templates/`, 그리고
+Claude Code 플러그인으로 배포되는 `skills/`(`.claude-plugin/`, 스킬 전용
+워크플로 `skills-ci.yml` · `skills-release.yml`)가 있습니다. 그 외의 배포
+패키지나 재사용 워크플로는 아직 없습니다.
 
 참조로 소비되는 인프라 중 가장 먼저 들어올 것은 실제로 두 곳 이상에서 쓰이는
 항목이며, 합의된 시작점은 린트·포매터 설정입니다. `templates/`는 이 기준에서

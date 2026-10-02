@@ -1,0 +1,135 @@
+name: skills-ci
+
+on:
+  pull_request:
+    paths:
+      - "skills/**"
+      - ".claude-plugin/**"
+      - "templates/skill/**"
+      - ".github/workflows/skills-ci.yml"
+      - ".github/skills-ci-requirements.txt"
+  push:
+    branches:
+      - main
+    paths:
+      - "skills/**"
+      - ".claude-plugin/**"
+      - "templates/skill/**"
+      - ".github/workflows/skills-ci.yml"
+      - ".github/skills-ci-requirements.txt"
+
+permissions:
+  contents: read
+
+env:
+  SKKIL_VERSION: v0.2.0
+  GITLEAKS_VERSION: 8.24.0
+
+jobs:
+  manifests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Check manifests are valid JSON
+        run: |
+          for manifest in .claude-plugin/plugin.json .claude-plugin/marketplace.json; do
+            jq empty "$manifest" || { echo "::error file=$manifest::not valid JSON"; exit 1; }
+          done
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Install Claude Code
+        run: npm install --global @anthropic-ai/claude-code
+
+      - name: Validate the marketplace
+        run: claude plugin validate . --strict
+
+      - name: Validate the plugin
+        run: claude plugin validate .claude-plugin/plugin.json
+
+  skills:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version: "1.26"
+
+      - name: Install skkil
+        run: go install "github.com/skkil/skkil/cmd/skkil@${SKKIL_VERSION}"
+
+      - name: Validate skills and manifests
+        run: skkil skills validate --all
+
+      - name: Require a version bump and changelog entry
+        if: github.event_name == 'pull_request'
+        run: skkil skills validate --all --against "origin/${{ github.base_ref }}"
+
+  scripts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install script dependencies
+        run: |
+          python -m pip install --quiet -r .github/skills-ci-requirements.txt
+          for requirements in skills/*/requirements.txt; do
+            [ -f "$requirements" ] && python -m pip install --quiet -r "$requirements"
+          done
+          true
+
+      - name: Compile Python scripts
+        run: |
+          files=$(find skills -path '*/scripts/*.py' -not -path '*/__pycache__/*')
+          [ -z "$files" ] || python -m py_compile $files
+
+      - name: Run each script with --help
+        run: |
+          status=0
+          for script in skills/*/scripts/*.py; do
+            [ -f "$script" ] || continue
+            if ! output=$(python "$script" --help 2>&1); then
+              echo "::error file=$script::--help failed"
+              echo "$output"
+              status=1
+            fi
+          done
+          exit $status
+
+      - name: Run skill tests
+        run: |
+          for tests in skills/*/tests; do
+            [ -d "$tests" ] || continue
+            echo "::group::$tests"
+            python -m pytest "$tests"
+            echo "::endgroup::"
+          done
+
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install gitleaks
+        run: |
+          archive="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          base="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}"
+          curl -fsSLO "$base/$archive"
+          curl -fsSLO "$base/gitleaks_${GITLEAKS_VERSION}_checksums.txt"
+          sha256sum --ignore-missing --check "gitleaks_${GITLEAKS_VERSION}_checksums.txt"
+          tar -xzf "$archive" gitleaks
+
+      - name: Scan for secrets
+        run: |
+          ./gitleaks dir skills --redact --no-banner
+          ./gitleaks dir .claude-plugin --redact --no-banner

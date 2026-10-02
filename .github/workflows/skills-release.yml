@@ -1,0 +1,57 @@
+name: skills-release
+
+on:
+  push:
+    tags:
+      - "skills-v*"
+
+permissions:
+  contents: write
+
+env:
+  SKKIL_VERSION: v0.2.0
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Check the tag matches plugin.json
+        run: |
+          version=$(jq -r .version .claude-plugin/plugin.json)
+          if [ "${GITHUB_REF_NAME#skills-v}" != "$version" ]; then
+            echo "::error::tag $GITHUB_REF_NAME does not match version $version in .claude-plugin/plugin.json"
+            exit 1
+          fi
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+
+      - name: Extract the changelog entry
+        run: |
+          awk -v heading="## $VERSION" '
+            $0 == heading || index($0, heading " ") == 1 { found = 1; next }
+            found && /^## / { exit }
+            found { print }
+          ' skills/CHANGELOG.md > notes.md
+          if ! grep -q '[^[:space:]]' notes.md; then
+            echo "::error file=skills/CHANGELOG.md::no entry for $VERSION"
+            exit 1
+          fi
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version: "1.26"
+
+      - name: Install skkil
+        run: go install "github.com/skkil/skkil/cmd/skkil@${SKKIL_VERSION}"
+
+      - name: Validate
+        run: skkil skills validate --all
+
+      - name: Pack skills
+        run: skkil skills pack --all --out dist
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" dist/*.skill --title "skills $VERSION" --notes-file notes.md --verify-tag

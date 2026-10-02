@@ -1,0 +1,6 @@
+.env.design
+.env*.local
+.design/
+__pycache__/
+*.pyc
+dist/

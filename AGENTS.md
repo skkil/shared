@@ -55,9 +55,10 @@ anything executable here.
 
 ## Current state
 
-This repository contains `README.md`, `AGENTS.md`, `CLAUDE.md`, and
-`templates/` — the one exception to "reference, never copy," explained below.
-Nothing else yet: no packages, no workflows, no modules, and no release tags.
+This repository contains `README.md`, `AGENTS.md`, `CLAUDE.md`, `templates/` —
+the one exception to "reference, never copy," explained below — and the agent
+skills in `skills/`, published as a Claude Code plugin (see "Skills in this
+repo"). Nothing else yet: no packages, no reusable workflows, no modules.
 
 Do not document, reference, or write code against anything not in the left
 column — it does not exist yet.
@@ -66,6 +67,7 @@ column — it does not exist yet.
 | --------------------------- | ----------------------------------------------- |
 | `README.md`, `AGENTS.md`, `CLAUDE.md` | Any published package                 |
 | `templates/` — see "The `templates/` exception" | Reusable workflows (`.github/workflows/`) |
+| `skills/` + `.claude-plugin/` — see "Skills in this repo" | |
 | The admission test, below   | Shared agent context (`agents/`)                |
 | The versioning policy, below | ADRs (`docs/adr/`)                             |
 | The layout plan, below      | Terraform modules, k8s bases                    |
@@ -101,6 +103,7 @@ roll a fix out to the copies. Every artifact needs a resolver:
 | Composite CI steps      | `uses: skkil/shared/.github/actions/x@v1`              |
 | Terraform               | `source = "git::…//modules/x?ref=v1"`                  |
 | Gradle                  | Version catalog / convention plugin, resolved by Maven |
+| Agent skills            | Claude Code marketplace — `/plugin install skkil@skkil` |
 | ADRs, runbooks          | Read by humans — documentation, per question 1         |
 
 A file that has no row here has no way into a consumer, which means it does not
@@ -141,6 +144,45 @@ other artifact here, which is exactly why it is scoped this narrowly:
   repository's default branch. That decision — no `ref` field, no caching —
   lives in `skkil`'s own `docs/config/v1/example.yml`; do not add a version
   knob here to compensate for it.
+
+---
+
+## Skills in this repo
+
+The whole repository is one Claude Code plugin (`skkil`) and its own
+marketplace (`skkil`): `.claude-plugin/plugin.json` and
+`.claude-plugin/marketplace.json` at the root, skills in `skills/<name>/`.
+Consumers install `skkil@skkil`; the marketplace is the resolver, so this is
+reference, not copy. Other agents get copies through `skkil skills install
+--agent <id>`, tracked by a marker file — that copying lives in `skkil`, not
+here.
+
+When you change anything under `skills/` or `.claude-plugin/`:
+
+- **Bump `version` in `.claude-plugin/plugin.json`** — patch for fixes and
+  wording, minor for a new skill or capability, major for a removed or renamed
+  skill or a breaking script interface. Never put a `version` in
+  `marketplace.json`.
+- **Add an entry to `skills/CHANGELOG.md`** under the new version.
+- **Validate** with `skkil skills validate --all --against origin/main` and
+  `claude plugin validate . --strict`. CI runs both; a PR that changes skill
+  files without a bump or changelog entry fails.
+- **Never commit keys or `.env` files.** Skills read keys from each user's
+  local, gitignored env files (Rebecca uses `.env.design`).
+- **Do not edit a skill's contents to make a check pass** unless that is the
+  task; report the finding to the skill's owner.
+
+Why this does not break "Tag releases, never `@main`": the marketplace tracks
+the default branch, but Claude Code only treats a change in `plugin.json`'s
+`version` as an update, so the version field is the release gate. Releases are
+also tagged `skills-v<version>`, which publishes `.skill` archives. The
+`skills-v` prefix keeps these tags apart from the rest of this repository.
+
+Nothing at the repository root may become a plugin component by accident:
+Claude Code auto-loads `commands/`, `agents/`, `hooks/hooks.json`, `.mcp.json`,
+`.lsp.json`, `output-styles/`, `workflows/`, `themes/`, `monitors/`,
+`settings.json` and `bin/` from the plugin root. Do not create any of these at
+the root of this repository. `templates/` is not scanned.
 
 ---
 
@@ -207,6 +249,7 @@ An empty directory with a `.gitkeep` is a promise this repository cannot keep.
 
 ```
 templates/           files skkil templates install copies into a consuming repo, once
+skills/              agent skills, published with .claude-plugin/ as the skkil plugin
 packages/            published npm packages — eslint-config, prettier-config, tsconfig
 .github/workflows/   reusable workflows, called with workflow_call
 .github/actions/     composite actions

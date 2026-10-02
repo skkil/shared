@@ -1,0 +1,15 @@
+{
+  "purpose": "Mascot for landing hero: cheap drafts first, pixel walk cycle from the chosen draft",
+  "jobs": [
+    {"id": "mascot-drafts", "provider": "fal", "endpoint": "openai/gpt-image-2",
+     "why": "4 low-quality drafts to choose pose/proportions before paying for quality",
+     "tags": ["mascot", "draft"],
+     "input": {"prompt": "Character turnaround sheet of one chunky round otter mechanic mascot: front, three-quarter, side, back, evenly spaced, identical proportions (head 1.2x body), thick even dark-brown outline, flat fills in #7A5234 #F2EFE6 #FF5A36, single soft highlight, no text, no ground shadow, flat solid #00B140 background",
+               "image_size": {"width": 1536, "height": 1024}, "quality": "low", "num_images": 4, "background": "opaque"}},
+    {"id": "walk-cycle", "provider": "retrodiffusion", "endpoint": "inferences",
+     "why": "8-frame pixel walk from the approved draft (after keying + pixelate, asset id filled in)",
+     "tags": ["mascot", "pixel", "animation"],
+     "input": {"prompt_style": "rd_advanced_animation__walking", "width": 64, "height": 64, "num_images": 1,
+               "frames_duration": 8, "input_image": "asset:A-0000", "return_spritesheet": true}}
+  ]
+}
