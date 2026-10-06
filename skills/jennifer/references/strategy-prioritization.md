@@ -31,7 +31,7 @@ From April Dunford's *Obviously Awesome*, built in this order, because each step
 5. **Market category:** the frame that makes our value obvious to those customers. Choosing an existing category, a subsegment of one, or (rarely, expensively) a new one.
 6. **Relevant trends** that make it matter now, used sparingly.
 
-Output a positioning statement plus a messaging hierarchy (core claim, three supporting value points, proof for each) for Rebecca and Wren. Positioning is hypothesis until the target customers respond to it; test headlines on a landing page or in outreach before committing.
+Output a positioning statement plus a messaging hierarchy (core claim, three supporting value points, proof for each) for Rebecca and Vanessa. Positioning is hypothesis until the target customers respond to it; test headlines on a landing page or in outreach before committing.
 
 ## 3. Defensibility
 

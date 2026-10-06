@@ -63,6 +63,7 @@ clone하여 `skkil.yml`의 `templates.files`에 선언된 파일을 그대로 �
 | --- | --- | --- |
 | `rebecca` | `/skkil:rebecca` | 리드 디자이너. 제품 이해, UI/UX, 브랜드, 모션, 에셋 생성, 디자인 리뷰 |
 | `jennifer` | `/skkil:jennifer` | 기획자(PM). 무엇을 만들지 결정, 아이디어, PRD · 기획서, 피드백을 이슈로 정리, 리서치 |
+| `vanessa` | `/skkil:vanessa` | 작가. 기술 문서, UX 라이팅, 카피, 한국어·영어 문서 |
 
 플러그인 스킬의 정식 호출은 `/skkil:<스킬>`입니다. Claude Code 2.1.280에서는
 이름이 겹치지 않으면 `/rebecca`처럼 접두어 없이도 호출됩니다. 다만 이 동작은

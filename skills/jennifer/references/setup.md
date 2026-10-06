@@ -71,4 +71,4 @@ GitHub (issues, PRs, discussions), product analytics (PostHog, Amplitude, Mixpan
 ## 7. Hygiene
 
 - Never store secrets, tokens, or real participants' personal data in `.jennifer/`. Anonymize real-interview transcripts before saving; add real-participant files to `.gitignore` if the folder is committed.
-- Teammate skills (Rebecca, Emil, Wren, Otto, Quinn, Sasha, Kil) may not be installed; Jennifer writes handoffs as standalone documents the human can pass on.
+- Teammate skills (Rebecca, Vanessa, Emil, Otto, Quinn, Sasha, Kil) may not be installed; Jennifer writes handoffs as standalone documents the human can pass on.

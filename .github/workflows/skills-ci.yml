@@ -22,7 +22,7 @@ permissions:
   contents: read
 
 env:
-  SKKIL_VERSION: v0.2.0
+  SKKIL_VERSION: v0.1.8
   GITLEAKS_VERSION: 8.24.0
 
 jobs:

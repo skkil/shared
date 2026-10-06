@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TITLE: the page's point in a few words</title>
+<style>
+/* Theme tokens: Rebecca restyles the page by changing only this block. */
+:root {
+  --paper: #fdfcfa; --ink: #1d1d1f; --ink-soft: #4a4a52; --rule: #dedbd5;
+  --accent: #1f5fa8; --accent-ink: #ffffff; --tint: #f1efea; --warn: #8a4b00; --warn-tint: #fff4e0;
+  --font-body: -apple-system, "Segoe UI", system-ui, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, "D2Coding", monospace;
+  --size-body: 1.125rem; --leading: 1.6; --leading-ko: 1.75;
+  --measure: 68ch; --measure-ko: 38em; --space: 1rem; --radius: 4px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #16171a; --ink: #e9e7e3; --ink-soft: #b4b1ab; --rule: #34363b; --accent: #7fb0ec; --accent-ink: #0d1117; --tint: #202227; --warn: #ffb35c; --warn-tint: #2b2215; } }
+:root[data-theme="dark"] { --paper: #16171a; --ink: #e9e7e3; --ink-soft: #b4b1ab; --rule: #34363b; --accent: #7fb0ec; --accent-ink: #0d1117; --tint: #202227; --warn: #ffb35c; --warn-tint: #2b2215; }
+* { box-sizing: border-box; }
+html { font-size: 100%; -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: var(--size-body)/var(--leading) var(--font-body); }
+:lang(ko) { line-height: var(--leading-ko); word-break: keep-all; overflow-wrap: anywhere; }
+:lang(ko) em, :lang(ko) i { font-style: normal; font-weight: 600; }
+a { color: var(--accent); text-underline-offset: 0.15em; }
+a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr); max-width: 76rem; margin: 0 auto; padding: 1.5rem 1.25rem 4rem; gap: 2.5rem; }
+@media (min-width: 64rem) { .layout { grid-template-columns: 15rem minmax(0, 1fr); } }
+main { max-width: var(--measure); }
+main :lang(ko), main[lang="ko"] { max-width: var(--measure-ko); }
+header.page { margin-bottom: 2rem; }
+h1 { font-size: 2.1rem; line-height: 1.2; margin: 0 0 0.75rem; letter-spacing: -0.01em; }
+h2 { font-size: 1.5rem; line-height: 1.3; margin: 2.75rem 0 0.75rem; }
+h3 { font-size: 1.2rem; line-height: 1.35; margin: 2rem 0 0.5rem; }
+p, ul, ol, table, figure, details, pre { margin: 0 0 var(--space); }
+.lede { font-size: 1.2rem; color: var(--ink); }
+.meta { color: var(--ink-soft); font-size: 0.95rem; }
+code, pre { font-family: var(--font-mono); font-size: 0.9em; }
+pre { background: var(--tint); padding: 0.9rem 1rem; overflow-x: auto; border-radius: var(--radius); line-height: 1.5; }
+table { border-collapse: collapse; width: 100%; font-size: 0.97rem; display: block; overflow-x: auto; }
+th, td { text-align: left; vertical-align: top; padding: 0.45rem 0.7rem; border-bottom: 1px solid var(--rule); }
+th { font-weight: 600; }
+figure img, figure svg { max-width: 100%; height: auto; }
+figcaption { color: var(--ink-soft); font-size: 0.92rem; margin-top: 0.4rem; }
+.cite { font-size: 0.8em; vertical-align: super; text-decoration: none; }
+.gap { background: var(--warn-tint); color: var(--warn); padding: 0 0.25em; border-radius: 2px; }
+/* Table of contents */
+nav.toc { font-size: 0.95rem; }
+nav.toc ol { list-style: none; padding: 0; margin: 0; }
+nav.toc li { margin: 0.35rem 0; }
+nav.toc a { color: var(--ink-soft); text-decoration: none; }
+nav.toc a:hover, nav.toc a[aria-current="true"] { color: var(--accent); }
+@media (min-width: 64rem) { nav.toc { position: sticky; top: 1.5rem; align-self: start; max-height: calc(100vh - 3rem); overflow-y: auto; } }
+@media (max-width: 63.99rem) { nav.toc { border-bottom: 1px solid var(--rule); padding-bottom: 1rem; } }
+/* Source excerpts (inserted by extract_excerpts.py) */
+details.src-excerpt { border-left: 3px solid var(--rule); padding: 0.1rem 0 0.1rem 0.9rem; margin: 0.25rem 0 1.25rem; }
+details.src-excerpt summary { cursor: pointer; color: var(--ink-soft); font-size: 0.92rem; }
+details.src-excerpt[open] { border-left-color: var(--accent); }
+.src-meta { font-size: 0.9rem; color: var(--ink-soft); margin-top: 0.5rem; }
+.src-text { white-space: pre-wrap; background: var(--tint); padding: 0.8rem 1rem; border-radius: var(--radius); font-size: 0.97rem; max-height: 32rem; overflow-y: auto; }
+.src-render img { border: 1px solid var(--rule); }
+/* Self-check */
+details.check { background: var(--tint); padding: 0.7rem 1rem; border-radius: var(--radius); }
+details.check summary { cursor: pointer; font-weight: 600; }
+/* Step-through: a plain ordered list without script */
+ol.steps.js-on > li { display: none; }
+ol.steps.js-on > li.current { display: list-item; }
+.step-controls { display: none; gap: 0.5rem; align-items: center; margin-bottom: var(--space); }
+.js .step-controls { display: flex; }
+button { font: inherit; padding: 0.35rem 0.8rem; border: 1px solid var(--rule); background: var(--paper); color: var(--ink); border-radius: var(--radius); cursor: pointer; }
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+/* Explorable diagram */
+.explorable svg [data-node] { cursor: pointer; }
+.explorable svg [data-node] rect { fill: var(--tint); stroke: var(--rule); }
+.explorable svg [data-node][aria-pressed="true"] rect { stroke: var(--accent); stroke-width: 2.5; }
+.explorable svg text { fill: var(--ink); font: 14px var(--font-body); }
+.explorable svg line, .explorable svg path { stroke: var(--ink-soft); fill: none; }
+.node-panel { min-height: 4rem; border-top: 1px solid var(--rule); padding-top: 0.75rem; }
+.theme-toggle { position: fixed; top: 0.75rem; right: 0.75rem; font-size: 0.85rem; }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; } }
+@media print {
+  nav.toc, .theme-toggle, .step-controls { display: none !important; }
+  .layout { display: block; } main { max-width: none; }
+  ol.steps.js-on > li { display: list-item !important; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.8em; color: var(--ink-soft); }
+}
+</style>
+</head>
+<body>
+<button class="theme-toggle" type="button" aria-label="Switch light or dark theme">Theme</button>
+<div class="layout">
+  <nav class="toc" aria-label="On this page">
+    <ol>
+      <li><a href="#point">The point</a></li>
+      <li><a href="#section-2">SECTION 2 HEADING</a></li>
+    </ol>
+  </nav>
+  <main id="content">
+    <header class="page">
+      <h1>TITLE THAT STATES THE POINT</h1>
+      <p class="lede">The answer, decision, or capability in one or two sentences.</p>
+      <p class="meta">For READER. Sources checked YYYY-MM-DD. About N minutes to read.</p>
+    </header>
+
+    <section id="point">
+      <h2>INFORMATIVE HEADING</h2>
+      <p>A claim with its citation.<a class="cite" href="#src-S01" data-ledger="S01-C001-01">[1]</a></p>
+      <!-- excerpt:X01 -->
+      <p>An open gap looks like this: <span class="gap">[SOURCE NEEDED: what is missing]</span></p>
+    </section>
+
+    <section id="section-2">
+      <h2>SECTION 2 HEADING</h2>
+
+      <!-- Step-through: works as a plain list without script and in print. -->
+      <div class="step-controls" role="group" aria-label="Step through">
+        <button type="button" data-step="prev">Previous</button>
+        <button type="button" class="primary" data-step="next">Next</button>
+        <span class="meta" aria-live="polite" data-step-status></span>
+      </div>
+      <ol class="steps">
+        <li>First step, with what the reader should see.</li>
+        <li>Second step.</li>
+      </ol>
+
+      <!-- Explorable diagram: the table below carries the same content without script. -->
+      <figure class="explorable">
+        <svg viewBox="0 0 560 140" role="group" aria-label="System overview: select a component">
+          <g data-node="client" tabindex="0" role="button" aria-pressed="false"><rect x="10" y="45" width="140" height="50" rx="4"/><text x="80" y="75" text-anchor="middle">Client</text></g>
+          <line x1="150" y1="70" x2="210" y2="70"/>
+          <g data-node="api" tabindex="0" role="button" aria-pressed="false"><rect x="210" y="45" width="140" height="50" rx="4"/><text x="280" y="75" text-anchor="middle">API</text></g>
+          <line x1="350" y1="70" x2="410" y2="70"/>
+          <g data-node="db" tabindex="0" role="button" aria-pressed="false"><rect x="410" y="45" width="140" height="50" rx="4"/><text x="480" y="75" text-anchor="middle">Database</text></g>
+        </svg>
+        <div class="node-panel" aria-live="polite"><p class="meta">Select a component to see what it does, where its code lives, and what breaks when it fails.</p></div>
+        <figcaption>FIGURE CAPTION: what the diagram shows.</figcaption>
+      </figure>
+      <table>
+        <thead><tr><th>Component</th><th>Responsibility</th><th>Code</th><th>When it fails</th></tr></thead>
+        <tbody>
+          <tr data-node-row="client"><td>Client</td><td>ONE SENTENCE</td><td><code>app/</code></td><td>SYMPTOM AND RESPONSE</td></tr>
+          <tr data-node-row="api"><td>API</td><td>ONE SENTENCE</td><td><code>server/</code></td><td>SYMPTOM AND RESPONSE</td></tr>
+          <tr data-node-row="db"><td>Database</td><td>ONE SENTENCE</td><td><code>db/</code></td><td>SYMPTOM AND RESPONSE</td></tr>
+        </tbody>
+      </table>
+
+      <details class="check">
+        <summary>Check yourself: QUESTION</summary>
+        <p>ANSWER, with the sentence of this page that supports it.</p>
+      </details>
+    </section>
+
+    <section id="sources">
+      <h2>Sources</h2>
+      <ol>
+        <li id="src-S01">AUTHOR. <cite>TITLE</cite>. LOCATION. DATE. <a href="URL">Link</a></li>
+      </ol>
+    </section>
+  </main>
+</div>
+<script>
+(function () {
+  document.documentElement.classList.add("js");
+  var root = document.documentElement;
+  document.querySelector(".theme-toggle").addEventListener("click", function () {
+    var dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    root.dataset.theme = dark ? "light" : "dark";
+  });
+  document.querySelectorAll("ol.steps").forEach(function (list) {
+    var items = list.children, i = 0, box = list.previousElementSibling;
+    if (!box || !box.classList.contains("step-controls")) return;
+    list.classList.add("js-on");
+    var status = box.querySelector("[data-step-status]");
+    function show() { for (var k = 0; k < items.length; k++) items[k].classList.toggle("current", k === i);
+      status.textContent = "Step " + (i + 1) + " of " + items.length; }
+    box.addEventListener("click", function (e) { var d = e.target.dataset.step; if (!d) return;
+      i = Math.max(0, Math.min(items.length - 1, i + (d === "next" ? 1 : -1))); show(); });
+    show();
+  });
+  document.querySelectorAll(".explorable").forEach(function (fig) {
+    var panel = fig.querySelector(".node-panel"), table = fig.nextElementSibling;
+    function pick(node) {
+      fig.querySelectorAll("[data-node]").forEach(function (n) { n.setAttribute("aria-pressed", n === node ? "true" : "false"); });
+      var row = table && table.querySelector('[data-node-row="' + node.dataset.node + '"]');
+      if (!row) return;
+      var head = table.querySelectorAll("th"), cells = row.children, html = "";
+      for (var k = 0; k < cells.length; k++) html += "<p><strong>" + head[k].textContent + ":</strong> " + cells[k].innerHTML + "</p>";
+      panel.innerHTML = html;
+    }
+    fig.querySelectorAll("[data-node]").forEach(function (n) {
+      n.addEventListener("click", function () { pick(n); });
+      n.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(n); } });
+    });
+  });
+  var links = document.querySelectorAll("nav.toc a");
+  if ("IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function (entries) { entries.forEach(function (en) { if (en.isIntersecting) {
+      links.forEach(function (a) { a.setAttribute("aria-current", a.getAttribute("href") === "#" + en.target.id ? "true" : "false"); }); } }); },
+      { rootMargin: "0px 0px -70% 0px" });
+    document.querySelectorAll("main section[id]").forEach(function (s) { io.observe(s); });
+  }
+  window.addEventListener("beforeprint", function () { document.querySelectorAll("details").forEach(function (d) { d.dataset.wasOpen = d.open; d.open = true; }); });
+  window.addEventListener("afterprint", function () { document.querySelectorAll("details").forEach(function (d) { d.open = d.dataset.wasOpen === "true"; }); });
+})();
+</script>
+</body>
+</html>

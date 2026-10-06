@@ -49,7 +49,7 @@ Describe how users arrive and return as **loops**, not just a funnel: a user doe
 
 ## 8. Launch campaigns
 
-A channel plan with timing, owners, and the message per channel. Global: Product Hunt, Hacker News (Show HN), relevant subreddits, X, LinkedIn, newsletters, press. Korean: Disquiet, GeekNews (news.hada.io), OKKY and Velog for developer products, relevant Naver cafes, KakaoTalk open chats, Everytime for student products, Korean tech press. Each community has norms: read the rules, contribute before promoting, and never use fake accounts or coordinated upvotes. A messaging brief goes to Rebecca (visuals) and Wren (docs and launch notes). Posting is gated.
+A channel plan with timing, owners, and the message per channel. Global: Product Hunt, Hacker News (Show HN), relevant subreddits, X, LinkedIn, newsletters, press. Korean: Disquiet, GeekNews (news.hada.io), OKKY and Velog for developer products, relevant Naver cafes, KakaoTalk open chats, Everytime for student products, Korean tech press. Each community has norms: read the rules, contribute before promoting, and never use fake accounts or coordinated upvotes. A messaging brief goes to Rebecca (visuals) and Vanessa (docs and launch notes). Posting is gated.
 
 ## 9. Content and community
 

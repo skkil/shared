@@ -59,6 +59,8 @@ Explain every significant choice in one plain sentence of *why* (the user should
 | Marketing kit, social, OG, store assets | Key visual → templates → renders | brand-and-marketing, platforms |
 | Design system / tokens / handoff | DESIGN.md → token tiers → platform outputs → specs | systems-and-handoff |
 | Design review of existing work | Critic + lint + a11y → prioritized fixes | critique-qa, anti-slop |
+| Vanessa's visual brief (`.vanessa/handoffs/rebecca-*.md`) | One visual per item: what it must show, why, the data, the exact text, constraints | systems-and-handoff |
+| Copy inside a design | Ask Vanessa, giving each element's space and character limit; keep her text as real text, never baked into images | ux-conversion |
 
 ## 3. Workflow: Discover → Define → Deliver
 

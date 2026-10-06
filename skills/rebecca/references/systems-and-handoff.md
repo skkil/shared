@@ -3,6 +3,7 @@
 ## 1. DESIGN.md as memory
 - `DESIGN.md` (template in assets/templates) is the master: product truth, direction contract, tokens, asset system,
   voice, platform notes, allowances, decision log. Read it at the start of every session; update it when decisions change.
+- Voice section: if `.vanessa/voice.md` exists, it is the full voice and tone guide; keep this section as a summary that points to it.
 - Surface overrides in `.design/surfaces/<surface>.md` (e.g. marketing site bolder than the app) win for that surface only.
 - The decision log prevents re-litigating choices and records what was tried and rejected.
 

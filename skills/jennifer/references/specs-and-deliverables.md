@@ -21,7 +21,7 @@ Jennifer produces the documents a Korean service planner (서비스 기획자) a
 | QA scenarios | QA 시나리오 / 테스트 케이스 | Test cases from acceptance criteria | Before release (with Quinn) |
 | Schedule | WBS / 일정표 | Tasks, owners, dates, dependencies, critical path | Projects with deadlines |
 | Release plan | 출시 계획서 | Rollout, flags, beta, communication, success metrics, rollback | Launches |
-| Release notes draft | 릴리스 노트 초안 | User-facing changes in plain language | Each release (with Wren) |
+| Release notes draft | 릴리스 노트 초안 | User-facing changes in plain language | Each release (with Vanessa) |
 | Post-launch review | 출시 회고 / 성과 분석 | Did the metric move, learnings, next | 2-6 weeks after launch |
 | Agent-executable spec | 구현 명세 (에이전트용) | Phased, machine-verifiable tasks for a coding agent | Handoff to Emil |
 
@@ -138,7 +138,7 @@ Rules: consistent naming, no personal data in event properties beyond what the p
 ## 11. QA, release, and post-launch
 
 - **QA scenarios** (with Quinn): derived one-to-one from acceptance criteria plus the edge-case checklist; each with ID, preconditions, steps, expected result, priority.
-- **Release plan:** scope, rollout stages (internal → beta → percentage rollout → all), feature flags, go/no-go criteria agreed in advance, monitoring during rollout, rollback trigger and procedure, communication plan (Wren for docs and notes, Rebecca for visuals), and who's on point.
+- **Release plan:** scope, rollout stages (internal → beta → percentage rollout → all), feature flags, go/no-go criteria agreed in advance, monitoring during rollout, rollback trigger and procedure, communication plan (Vanessa for docs and notes, Rebecca for visuals), and who's on point.
 - **Release notes draft:** what changed for the user and why it helps, in plain language; internal details removed.
 - **Post-launch review** (template `post-launch-review.md`), 2-6 weeks after launch: target vs actual for each metric, guardrails, what we learned about users, what surprised us, decision (keep / iterate / roll back / remove), and updates to `PRODUCT.md` and the opportunity tree.
 

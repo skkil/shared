@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 env:
-  SKKIL_VERSION: v0.2.0
+  SKKIL_VERSION: v0.1.8
 
 jobs:
   release:

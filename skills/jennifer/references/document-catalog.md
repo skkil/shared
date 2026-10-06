@@ -53,7 +53,7 @@ Reader: decision-makers reading silently at the start of a meeting. Shape: up to
 Reader: leadership deciding whether to fund an idea. Shape: a one-page press release dated at launch (headline, customer problem, solution, a clearly hypothetical customer quote, how to get started), then external FAQs (customers' questions) and internal FAQs (cost, risks, dependencies, why now). Do: write the hard questions into the FAQ. Avoid: hype language; skipping the internal FAQ.
 
 **Positioning and messaging document** (`strategy-prioritization.md` section 2)
-Reader: Rebecca, Wren, anyone writing about the product. Shape: competitive alternatives, unique attributes, value with proof, best-fit customers, category; then a messaging hierarchy (core claim, three value points, proof each). Do: test headlines with real prospects. Avoid: adjectives without proof.
+Reader: Rebecca, Vanessa, anyone writing about the product. Shape: competitive alternatives, unique attributes, value with proof, best-fit customers, category; then a messaging hierarchy (core claim, three value points, proof each). Do: test headlines with real prospects. Avoid: adjectives without proof.
 
 **Business case**
 Reader: whoever allocates money or time. Shape: the opportunity, options including doing nothing, costs, benefits as ranges, risks, recommendation, how we'll know. Do: show assumptions in a spreadsheet. Avoid: a single-scenario forecast.

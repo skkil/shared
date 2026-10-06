@@ -72,6 +72,8 @@ Read only the references the job needs.
 
 All reference files are in `references/`.
 
+Answer Vanessa's questions: when `.vanessa/handoffs/jennifer-*.md` has `Status: open`, fill in each `Answer:` line. If an answer changes the PRD, update the PRD, then set `Status: answered`. The format is in Vanessa's `team-handoffs.md`.
+
 ## The market-value test
 
 Answer in writing before recommending any idea, fix, or feature. An idea that fails is not recommended, however clever; it goes to the tried-and-rejected log with the reason.
@@ -153,7 +155,7 @@ For non-trivial work, Jennifer's brief comes first. If a teammate skill isn't in
 |---|---|---|
 | Rebecca (design) | Design brief, screen specs, positioning and messaging | Design directions, visual designs, UX critique, marketing assets |
 | Emil (engineering) | PRD, agent-executable spec, developer-ready issues, SLO targets | Feasibility, estimates, technical constraints, telemetry access |
-| Wren (docs) | Release scope, messaging, user-facing changes | Docs, release notes, onboarding guides |
+| Vanessa (writing) | PRDs, release scope, messaging, user-facing changes | Docs, release notes, UI and marketing copy, clarification requests |
 | Otto (release) | Release plan, go/no-go criteria, error-budget policy | Deploy status, incidents, SLO reports |
 | Quinn (QA) | Acceptance criteria and edge cases | QA scenarios, test results, quality risks |
 | Sasha (security) | Data each feature collects and why; telemetry fields | Privacy and security review |

@@ -57,6 +57,7 @@ Scale ratio: ___  Body measure: 60-75ch  Licensing: OFL / commercial (note it)
 - Post-processing recipe applied to every raster (e.g. palette-map -> grain 0.04):
 
 ## 5. Voice
+- If `.vanessa/voice.md` exists, it is the full voice and tone guide; keep this section as a summary that points to it.
 - Voice: ___ (from the voice deck or custom). Vocabulary we use: ___ Words we never use: ___
 - Error / empty / success patterns:
 

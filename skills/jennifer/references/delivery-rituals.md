@@ -47,7 +47,7 @@ Before: an agenda with the meeting's goal and the decisions needed, sent in adva
 
 ## 8. Launches
 
-Checklist by function with owners; staged rollout (internal → beta → percentage → all) behind feature flags; go/no-go criteria agreed in advance, including release-health gates (`observability.md` section 8); a rehearsed rollback; communication plan with Wren and Rebecca; a named person on point during rollout; a date for the post-launch review.
+Checklist by function with owners; staged rollout (internal → beta → percentage → all) behind feature flags; go/no-go criteria agreed in advance, including release-health gates (`observability.md` section 8); a rehearsed rollback; communication plan with Vanessa and Rebecca; a named person on point during rollout; a date for the post-launch review.
 
 ## 9. Unblocking
 
