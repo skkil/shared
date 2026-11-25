@@ -25,7 +25,28 @@ Never linear for UI movement (linear is for progress, rotation loops, marquee-li
 Choreography: stagger 30-60ms, max ~6 items before grouping; one leader element moves first; content is
 visible by default and animates from a visible state, so a failed script never hides content.
 
+Frequency sets the budget before anything else:
+
+| How often the user triggers it | Motion |
+|---|---|
+| Many times a day (command palette, list navigation, tab switches, typing) | None. Instant beats smooth |
+| Tens of times a day | Feedback only: press state, under 150ms |
+| Occasionally (opening a panel, saving) | Standard tokens above |
+| Rarely (first success, onboarding, upgrade) | Where the signature moment and delight belong |
+
+Never animate keyboard-initiated actions. Nothing real appears from a point: enter from `scale(0.95)` with opacity 0,
+never `scale(0)` (lint warns). Press feedback is `scale(0.97)` (0.95-0.98) over ~150ms. Gate hover effects behind
+`@media (hover: hover) and (pointer: fine)` so touch devices don't get stuck hover states. Keep blur under 20px.
+Prefer interruptible transitions or springs over keyframes for anything the user can reverse mid-motion. Under
+reduced motion, keep opacity and color changes and remove movement.
+
 Write motion tokens into DESIGN.md and use them as CSS custom properties / JS constants everywhere.
+
+Ready-made components: a faceted registry such as Forever (`infinite/components.index.json`, per-file
+`forever-agent-meta` with useWhen/avoidWhen) can supply a starting effect. Filter before fetching: skip
+`needs-review`, skip `perfTier: expensive` on mobile, skip pointer-only interactions on touch. Then make it ours:
+replace hardcoded colors and sizes with tokens, keep its reduced-motion and `document.hidden` pause handling,
+and run slop_lint on it like our own code.
 
 ## 2. Choosing the technique
 

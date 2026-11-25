@@ -12,6 +12,9 @@ claude.ai artifact tools → Claude Chat; an artboard canvas with no shell → C
 - Optional hard gate: offer to add a project hook that runs `slop_lint.py` on changed UI files after edits, so the
   gate fires even when the agent forgets.
 - MCP: fal and Retro Diffusion have MCP servers; if connected, they still go through the spend protocol.
+- Blender (`blender --version`, 4.2+) enables real 3D modeling and renders through `blender.py`; ffmpeg enables
+  turntables and `video_check.py`. Check once per session; if missing, say so and fall back to procedural
+  three.js or image-to-3D.
 
 ## Claude Chat (claude.ai)
 - The code sandbox can install packages but cannot reach fal.ai or Retro Diffusion (`media.py run` fails at $0).

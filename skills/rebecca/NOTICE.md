@@ -18,6 +18,36 @@ the original, and this notice credits it.
 - **Anthropic skills** (see each skill's LICENSE.txt): frontend-design, canvas-design, algorithmic-art, theme-factory,
   brand-guidelines, slack-gif-creator, web-artifacts-builder; and the design plugin skills (critique, handoff,
   design system, UX copy, accessibility review, user research, research synthesis).
+- **Impeccable** v4 (late 2026): the `detect` CLI's CI outputs and stale-waiver reporting, and `doctor`'s
+  DESIGN.md drift findings, which informed `slop_lint.py`'s `--github`, stale-allowance and `--tokens` checks; the
+  refinement verbs (bolder, quieter, distill, polish, harden, clarify, adapt, delight) behind
+  `references/refinement-passes.md`.
+- **taste-skill** v2.5 by Leonxlnx (MIT): multi-viewport browser checks (1440/768/390) as part of the gate.
+- **oil-ui** by oil-oil (MIT): directions that share at most one trait, the squint test, and a hint-free UX
+  walkthrough by an isolated reviewer.
+- **interface-design** by Dammyjay93 (MIT): the pre-component checkpoint naming intent and tokens before building.
+- **ux-ui-agent-skills** by plugin87 (MIT): the 280px overflow check.
+- **emil-design-eng** (master5d/claude-design-skills, after Emil Kowalski's published guidance): the
+  interaction-frequency motion budget, no animation on keyboard-initiated actions, no `scale(0)` entries, press
+  scale, hover gating by pointer type.
+- **open-3d-skills** by Moh4696 (MIT): procedural three.js kit (lathe, sweep, instanced kits), staged exploded
+  views, performance budgets and quality tiers, virtual-clock frame capture.
+- **motion-graphics-skills** by charlie947 (MIT): one-clock HTML motion pieces, loop frame-match, Reels safe zone,
+  delivery encode settings and ffprobe verification that shaped `video_check.py`.
+- **claude-drawing-skill** by cloveric (MIT): painting with numpy + Pillow (ink ridges, washes, mist, hatching,
+  iso-lines), render-look-fix rounds against a per-style failure list, staged draw-on frames; `draw.py` is
+  written from scratch.
+- **genart-skill** by camilleroux (MIT): seeded determinism with named sub-streams, contact sheets over single
+  renders, attribution and living-artist rules.
+- **tastemaker** by codeswithroh (MIT): solving palette role lightness against contrast floors, behind
+  `palette.py roles`.
+- **brand-identity-skill** by fatihaydost (MIT): mechanism sentence per logo set, 16/32 px logo sheets, measured
+  versus judged labels, stopping at the pick checkpoint, color-blindness checks.
+- **genjutsu** by AThevon (MIT): hygiene checks (layout-property animation, outline removal, clickable non-buttons,
+  timer-driven animation, perpetual motion, instant hover) adapted into `slop_lint.py`.
+- **dembrandt** CLI and skills (MIT): extracting live design tokens from a URL and measuring drift (used as a tool).
+- **styleseed** by bitjaru (MIT) and **forever-ai-components** by isas1 (MIT): hardcoded-hex checks; faceted
+  component registry with agent metadata and pre-retrieval quality gates.
 - **Remotion** official agent skills and documentation: frame-driven animation rules (install the official skill
   with `npx skills add remotion-dev/skills`; Remotion has its own license terms at remotion.dev/license).
 - **GSAP** official agent skills: referenced as a companion (`npx skills add https://github.com/greensock/gsap-skills`).
@@ -35,4 +65,6 @@ the original, and this notice credits it.
 - Paul Lacey (Beaver Builder masterclass): approval gates before building.
 - Meta, Belmont, the Designer's Field Guide, Kirupa / uxdesign.cc, Debora Vieira, and Figma guides on prompting and
   designing with AI: briefs, user promise, problem framing, content atomization, AI-feature design.
+- Richard MacManus, "Skill engineering and the case against one-shot AI design" (Latent Space, 2026): adjectives
+  need operational meaning; refinement is human-steered, not one-shot.
 - Platform facts on iOS 27 / Liquid Glass and Flutter from Apple coverage and Very Good Ventures (June-Sept 2026).

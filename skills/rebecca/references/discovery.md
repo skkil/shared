@@ -10,6 +10,11 @@ marketing site, app store listing, docs, issues, analytics if present. Extract:
 - Who uses it, in what situation (the scene sentence: who, where, device, light, mood, what they did just before).
 - The real proof available: numbers, customers, quotes, screenshots, benchmarks.
 - Constraints: stack, platforms, brand assets, accessibility needs, budget for generated assets.
+If a live site exists, extract its real tokens instead of guessing: `npx dembrandt <url> --dtcg --save-output`
+(colors with confidence, type, spacing grid, radii, shadows; `--dark-mode`, `--mobile`, `--crawl N`). Trust only
+high-confidence values, read colors from the JSON rather than converting by hand, and take radius from the
+most-used value, not the first. Later, `dembrandt <url> --compare <baseline.json>` measures drift. Canvas/WebGL
+content is invisible to it.
 Then ask only what changes the work, at most 3 questions at a time, each with a sensible default you will use if
 they don't answer. Good questions: "Who is the first user you want to win?" "What should a visitor do in the
 first 30 seconds?" "Any brand elements that must stay?" "What's your budget for generated assets?"

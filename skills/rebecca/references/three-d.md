@@ -22,15 +22,37 @@ the cost, weight, and risk. Decide per surface; record it in DESIGN.md.
 | Code-native 3D (three.js/R3F primitives, extrusions, procedural geometry, toon/matcap shaders) | free | Stylized objects, abstract product metaphors, data-driven scenes |
 | Image → 3D (`fal-ai/trellis-2`, `fal-ai/hunyuan3d/v2`) | ~$0.16-0.30 per model | A specific object from an approved concept image |
 | Retro Diffusion low-poly (rigged, animatable, pixel-textured) | $0.25-3 by size; free estimate | Characters, props and worlds in a low-poly/pixel direction |
-| Blender via Python (`bpy`) in Claude Code, if installed | free | Turntables, product renders, baking, format conversion |
+| **Blender via `scripts/blender.py`** (Claude Code, Blender 4.2+) | free | Real modeling: products, props, architecture, exploded views, cleanup of generated models, turntables, hero renders. Full guide: blender.md |
 | Spline | free tier | Designer-editable scenes the user wants to tweak visually |
+
+### 2b. Procedural three.js (models written as code in the page)
+
+No build step needed: pin `three@0.169.0` (or the project's version) through an import map.
+- Collect real dimensions first and write them as metre constants; block out in boxes, then detail by kind.
+- **Lathe** `[[r, y], ...]` for anything turned: columns, vases, knobs, wheels, domes.
+- **Sweep** a 2D profile along a path (`ExtrudeGeometry` with `extrudePath`, or a custom mitred sweep) for trims,
+  kerbs, handles, rails.
+- **Kits:** define a part once, place it with matrices, one `InstancedMesh` per part; merge static parts with
+  `BufferGeometryUtils.mergeGeometries`.
+- **Textures drawn in code** (canvas + seeded RNG, or `draw.py` output) instead of downloaded images.
+- Shader tweaks via `onBeforeCompile`; if you move vertices, patch `customDepthMaterial` too or shadows stay still.
+- **Exploded views:** per part `userData = {stage, explode: [x, y, z]}`; `set(t)` from 0 (assembled) to 1;
+  stage 0 moves first and each later stage starts when the previous is half done. Labels in two screen-edge
+  columns with leader lines; x-ray shells at ~14% opacity with `depthWrite: false`; a clipping plane for sections.
+  Product look: `RoomEnvironment` PMREM, `ShadowMaterial` floor, ACES, metals roughness 0.3-0.45, metalness 0.8-0.95.
+- **Budget** (laptop GPU at 1440×900): < 10 ms/frame, < 300 draw calls, < 2M triangles. Expose
+  `window.__app = {renderer}` so checks can read `renderer.info`. Quality tiers: high (DPR ≤ 2, GTAO, 4096
+  shadows), balanced (DPR 1.5), fast (DPR 1, no AO, 2048 shadows); drop a tier when frame time is over budget.
+- **Frame-accurate capture:** replace `performance.now`, `Date.now` and `requestAnimationFrame` with a virtual
+  clock that advances 1/60 s per captured frame, so recordings never stutter (or render through `@remotion/three`).
 
 ## 3. Image-to-3D pipeline
 
 1. Concept image (generated or provided): one object, three-quarter view, even neutral light, no cast shadows,
    plain background, the whole object in frame. Key it (`post.py key`).
 2. Plan and approve the 3D job (`media.py plan`), run, download the GLB.
-3. Inspect: load in a quick R3F viewer or `npx @gltf-transform/cli inspect model.glb`. Check scale, pivot, normals, texture size.
+3. Inspect: `python scripts/blender.py inspect model.glb --name x` (renders + scale, pivot, normals, budget
+   checks), or `npx @gltf-transform/cli inspect model.glb`. Clean up in Blender (blender.md §5).
 4. Optimize (section 5), then light and frame it in the page's look (section 4).
 
 ## 4. Look development

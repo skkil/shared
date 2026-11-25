@@ -13,6 +13,9 @@ gaps stated honestly). More rounds tend to churn rather than improve.
 - Without subagents (Chat, Design): do a deliberate cold read. Write the critic prompt's sections yourself,
   looking only at the rendered output, and assume the work is not done.
 - Act on gaps that serve the brief; ignore suggestions that would add decoration or contradict DESIGN.md.
+- Blind walkthrough for flows: another fresh subagent gets the screenshots in order and the user's goal, never the
+  intended path, and narrates each step it would take. Where it hesitates, guesses or picks the wrong control is
+  a finding, ranked above visual polish.
 
 ## 3. Rubric (score each 0-10; the critic's overall score is not an average)
 1. First impression and the 5-second test.
@@ -43,6 +46,7 @@ gaps stated honestly). More rounds tend to churn rather than improve.
 - [ ] Every claim has real proof; no placeholder people/companies/stats
 - [ ] All states designed (empty, loading, error, success; hover/focus/active/disabled)
 - [ ] Contrast matrix checked; keyboard path works; reduced motion works
-- [ ] Mobile and desktop screenshots reviewed
+- [ ] Desktop, tablet and mobile screenshots reviewed; no horizontal scroll at 280px (`capture.py --overflow`)
+- [ ] No `token-drift` warnings left unexplained; no stale allowances
 - [ ] Assets: library ids recorded, rated, licenses noted, spend reported
 - [ ] Subtraction pass done (one decorative element removed per section, if any remained)

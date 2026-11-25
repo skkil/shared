@@ -6,9 +6,21 @@
 - **Logo**: built as code (SVG) so it is editable and crisp.
   - Wordmark with one custom detail drawn from the product's mechanism, or a symbol derived from what the product
     does (not a generic spark, hexagon, or gradient blob).
-  - Design in one color first; test at 16px favicon size, on dark and light, and in a tinted app icon.
+  - Design in one color first; build symbols on a 100-unit grid from boolean shapes, never live `<text>`.
+  - Make 3+ logo sets, each with one sentence naming the mechanism it borrows from the product. At least one set
+    must avoid every default in anti-slop.md.
+  - Contact sheet of every set at 16 and 32 px, on light and dark grounds (`post.py sheet` on exported PNGs);
+    a mark that turns to mush at 16 px is cut or simplified. Two fix rounds, then stop and let the user pick;
+    never pick for them.
   - Deliver: SVG (full, mark, mono, reversed), PNG exports, clear-space and minimum-size rules.
 - **Color, type, voice, illustration, motion**: from DESIGN.md; the brand board shows all of them on one page.
+  Palette roles come from `palette.py roles "<key>"` (solved against contrast floors), then `palette.py cvd`
+  so no pair collapses under color blindness.
+- **Measured vs judged:** label every claim in the guidelines. Contrast, color-blindness, glyph coverage, font
+  license and file validity are measured; everything else is a labelled judgement.
+- **Deliverables:** SVG/PNG logo set (full color, one color, reversed, app icon, favicon), tokens (CSS, Tailwind,
+  DTCG JSON), a brand board, and a short guidelines page (HTML → PDF via `capture.py`).
+- **Refresh of an existing brand:** extract what is actually shipped before changing it (discovery.md §1).
 - **Mascot** (optional): character bible + rig (character-animation.md). A mascot must have a job in the product.
 
 ## 2. Launch and marketing kit (render from HTML templates + capture.py for consistency)

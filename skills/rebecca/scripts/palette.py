@@ -5,6 +5,9 @@
   python scripts/palette.py check "#1d1d1f" "#f5f0e6"            # WCAG 2 ratio, AA/AAA verdicts
   python scripts/palette.py matrix "#0e2a47,#f2efe6,#ff5a36,#7a8c99"   # every fg/bg pair
   python scripts/palette.py css "#2B59C3" --name brand           # ramp as CSS custom properties
+  python scripts/palette.py roles "#2B59C3" --mode light --harmony split   # solve bg/text/primary/accent against contrast floors
+  python scripts/palette.py cvd "#0e2a47,#ff5a36,#3c8d5a"         # simulate color blindness, flag pairs that collapse
+Roles are solved, not checked afterwards: each role's lightness is searched until it clears its floor.
 Targets: body text >= 4.5:1, large text (>=24px or >=19px bold) >= 3:1, UI components/icons >= 3:1.
 """
 import argparse, math
@@ -70,6 +73,56 @@ def ramp(hexc):
         out.append((name, rgb2hex(fit(L, max(0.0, C0*max(0.25, taper)), H))))
     return out
 
+def oklab(rgb):
+    L, C, H = to_oklch(rgb)
+    return L, C * math.cos(math.radians(H)), C * math.sin(math.radians(H))
+
+def solve_L(C, H, against, floor, start, direction):
+    L = start
+    while 0.02 <= L <= 0.99:
+        rgb = fit(L, C, H)
+        if ratio(rgb, against) >= floor:
+            return rgb
+        L += 0.01 * direction
+    return fit(max(0.02, min(0.99, L)), C, H)
+
+HARMONY = {"mono": 0, "analogous": 32, "complementary": 180, "split": 150, "triadic": 120}
+
+def roles(key, mode, harmony):
+    L0, C0, H = to_oklch(hex2rgb(key))
+    dark = mode == "dark"
+    bg = fit(0.17 if dark else 0.975, 0.012, H)
+    surface = fit(0.21 if dark else 0.945, 0.014, H)
+    d = 1 if dark else -1
+    text = solve_L(0.012, H, bg, 8.0, 0.80 if dark else 0.35, d)
+    muted = solve_L(0.02, H, bg, 4.5, 0.60 if dark else 0.62, d)
+    border = solve_L(0.02, H, bg, 1.6, 0.30 if dark else 0.88, d)
+    control = solve_L(0.03, H, bg, 3.0, 0.40 if dark else 0.75, d)
+    C = C0
+    for _ in range(8):
+        primary = solve_L(C, H, bg, 3.0, L0, d)
+        label = max([(1, 1, 1), (0.08, 0.08, 0.08), text], key=lambda c: ratio(c, primary))
+        if ratio(label, primary) >= 4.5:
+            break
+        C *= 0.85
+    accent = solve_L(max(C0, 0.10), (H + HARMONY[harmony]) % 360, bg, 4.5, L0, d)
+    return {"bg": bg, "surface": surface, "text": text, "muted": muted, "border": border, "control-border": control,
+            "primary": primary, "on-primary": label, "accent": accent}
+
+CVD = {
+    "protan": ((0.152286, 1.052583, -0.204868), (0.114503, 0.786281, 0.099216), (-0.003882, -0.048116, 1.051998)),
+    "deutan": ((0.367322, 0.860646, -0.227968), (0.280085, 0.672501, 0.047413), (-0.011820, 0.042940, 0.968881)),
+    "tritan": ((1.255528, -0.076749, -0.178779), (-0.078411, 0.930809, 0.147602), (0.004733, 0.691367, 0.303900)),
+}
+
+def simulate(rgb, kind):
+    l = [lin(v) for v in rgb]
+    m = CVD[kind]
+    return tuple(delin(max(0.0, min(1.0, sum(m[i][j] * l[j] for j in range(3))))) for i in range(3))
+
+def dist(a, b):
+    return math.dist(oklab(a), oklab(b))
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sp = ap.add_subparsers(dest="cmd", required=True)
@@ -77,6 +130,9 @@ def main():
     p = sp.add_parser("css"); p.add_argument("color"); p.add_argument("--name", default="brand")
     p = sp.add_parser("check"); p.add_argument("fg"); p.add_argument("bg")
     p = sp.add_parser("matrix"); p.add_argument("colors")
+    p = sp.add_parser("roles"); p.add_argument("color"); p.add_argument("--mode", choices=["light", "dark"], default="light")
+    p.add_argument("--harmony", choices=list(HARMONY), default="split"); p.add_argument("--css", action="store_true")
+    p = sp.add_parser("cvd"); p.add_argument("colors"); p.add_argument("--min-distance", type=float, default=0.07)
     a = ap.parse_args()
     if a.cmd in ("ramp", "css"):
         L, C, H = to_oklch(hex2rgb(a.color))
@@ -88,6 +144,27 @@ def main():
                 print(f"  --{a.name}-{n}: {hx};")
             else:
                 print(f"{a.name}-{n:<4} {hx}  on white {ratio(c,(1,1,1)):5.2f} {verdict(ratio(c,(1,1,1))):11} on black {ratio(c,(0,0,0)):5.2f} {verdict(ratio(c,(0,0,0)))}")
+    elif a.cmd == "roles":
+        r = roles(a.color, a.mode, a.harmony)
+        bg = r["bg"]
+        for k, v in r.items():
+            if a.css:
+                print(f"  --{k}: {rgb2hex(v)};")
+            else:
+                vs = r["primary"] if k == "on-primary" else bg
+                print(f"{k:15} {rgb2hex(v)}  {ratio(v, vs):5.2f}:1 vs {'primary' if k == 'on-primary' else 'bg'}")
+    elif a.cmd == "cvd":
+        cs = [c.strip() for c in a.colors.split(",")]
+        bad = 0
+        for kind in CVD:
+            sims = [simulate(hex2rgb(c), kind) for c in cs]
+            print(f"{kind}: " + "  ".join(f"{c}->{rgb2hex(s)}" for c, s in zip(cs, sims)))
+            for i in range(len(cs)):
+                for j in range(i + 1, len(cs)):
+                    if dist(hex2rgb(cs[i]), hex2rgb(cs[j])) >= a.min_distance > dist(sims[i], sims[j]):
+                        bad += 1
+                        print(f"  COLLAPSE {cs[i]} vs {cs[j]}: {dist(sims[i], sims[j]):.3f} apart for {kind} (add a shape, label or lightness gap)")
+        print("cvd: OK" if not bad else f"cvd: {bad} pair(s) collapse; never let color be the only signal")
     elif a.cmd == "check":
         r = ratio(hex2rgb(a.fg), hex2rgb(a.bg)); print(f"{a.fg} on {a.bg}: {r:.2f}:1  {verdict(r)}")
     else:

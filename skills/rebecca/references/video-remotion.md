@@ -42,7 +42,7 @@ store previews, animated mascot clips, and data stories.
 | Use | Size | Notes |
 |---|---|---|
 | Website hero, YouTube, X/LinkedIn landscape | 1920×1080 @30 (or 60 for UI-heavy) | Keep text inside 90% action-safe |
-| Reels, TikTok, Shorts, Stories | 1080×1920 | Keep key text out of the bottom ~20% and top ~12% (platform UI) |
+| Reels, TikTok, Shorts, Stories | 1080×1920 | Reels: content within y 360-1420, nothing in the bottom 500px or right 120px (`video_check.py --safe reels`) |
 | Feed square / portrait | 1080×1080, 1080×1350 | Captions large: ≥ 48px at 1080w |
 | App Store preview | device-specific portrait/landscape, 15-30s | Must show the app in use; check Apple's current resolutions |
 | Google Play promo | YouTube link | Landscape |
@@ -61,6 +61,22 @@ For 1080-wide frames use ~80px side and ~100px top/bottom safe margins; headline
 - 3D with `@remotion/three`; Lottie with `@remotion/lottie`; captions with `@remotion/captions`.
 - License: Remotion is free for individuals and very small companies; larger companies need a company license.
   Check remotion.dev/license and tell the user if it may apply.
+
+### 4b. Without Remotion: one HTML file and one clock
+
+For short motion pieces (loops, title cards, animated charts, social clips), one self-contained HTML file whose
+every animation reads from a single `window.seek(seconds)` is enough: GSAP timelines with `paused: true` and
+`tl.seek(t)`, or CSS animations driven by negative `animation-delay`. Capture frames with Playwright at a fixed
+step and encode with ffmpeg. Never let wall-clock timers drive it; frames must be identical on every render.
+
+Loops: move 0 → ~2.2s, hold, return by the end; the first and last frames must match
+(`video_check.py --loop`). For stylized pieces, animate "on twos" (hold each pose 2 frames at 24 fps).
+
+## 4c. Verify before delivery
+
+`python scripts/video_check.py out.mp4 --sheet 8` (one frame per beat: look for cut-off text, overlaps,
+unreadable type at phone size), `--safe reels|shorts|story|feed45|landscape --at <s>` for platform UI overlays,
+`--loop` for loops, and `--encode final.mp4` for a delivery-safe H.264/yuv420p/BT.709/faststart/AAC file.
 
 ## 5. Footage, camera and sound
 

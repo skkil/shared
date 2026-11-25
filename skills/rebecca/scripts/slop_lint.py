@@ -8,8 +8,13 @@ is still judged by the critic pass. Every finding carries a positive alternative
 banning a default without naming a replacement makes the model jump to the NEXT default.
 
 Usage
-  python scripts/slop_lint.py PATH [PATH...] [--json] [--allow RULE ...] [--warn-only]
+  python scripts/slop_lint.py PATH [PATH...] [--json | --github] [--allow RULE ...] [--warn-only]
+                              [--tokens .design/DESIGN.md]
 Exit code 1 if any FAIL remains (after allowances).
+
+--tokens flags hex colors in code that DESIGN.md does not define (design memory drift).
+--github prints GitHub Actions annotations so CI shows findings inline on the PR.
+Allowances that suppressed nothing in this run are reported as stale: delete them or re-scope them.
 
 Allowances (the brief wins): if the user/brief explicitly asked for something on this list, allow it
 with a reason instead of fighting it:
@@ -156,6 +161,22 @@ R = {r.id: r for r in [
          "name what happens: 'Create your first board', 'See pricing', 'Save changes'"),
     Rule("emoji-ui", "warn", "emoji standing in for an icon system or decorating headings",
          "one consistent icon family (or authored glyphs); emoji only in a playful, social brand voice by choice"),
+    Rule("scale-from-zero", "warn", "elements growing from scale(0) look like they come from nowhere",
+         "start from scale(0.95) with opacity 0; nothing real appears from a point"),
+    Rule("layout-animation", "fail", "transitioning width/height/top/left/margin/padding forces layout every frame and janks",
+         "animate transform and opacity; use FLIP (Motion `layout`) for size and position changes"),
+    Rule("outline-none", "fail", "focus outline removed with no visible replacement; keyboard users lose their place",
+         "style :focus-visible with a 2px ring in a brand color at 3:1 against its surroundings"),
+    Rule("clickable-div", "fail", "click handler on a div/span: no keyboard access, no role, not announced",
+         "use <button> (or <a href> for navigation); style it however you want"),
+    Rule("timer-animation", "warn", "setInterval/setTimeout driving visual change drifts, stutters and ignores reduced motion",
+         "CSS transitions/keyframes, Web Animations API, or requestAnimationFrame tied to elapsed time"),
+    Rule("perpetual-motion", "warn", "infinite ambient animation competes with content forever",
+         "animate once on a meaningful event, or pause offscreen and after a few cycles; never for decoration alone"),
+    Rule("hover-no-transition", "warn", "hover changes color/background instantly, which reads as unfinished",
+         "add a 120-200ms ease-out transition on the changed properties, gated by (hover: hover)"),
+    Rule("token-drift", "warn", "hex color used in code but not defined in DESIGN.md",
+         "use the token (CSS variable / theme constant), or add the color to DESIGN.md with a reason"),
 ]}
 
 
@@ -193,6 +214,7 @@ SAFE_ACCENTS = {"10b981", "059669", "22c55e", "34d399", "a3e635", "84cc16", "4f4
 class Linter:
     def __init__(self, allow: dict):
         self.allow = allow
+        self.allow_hits = set()
         self.findings = []
         self.motion_files, self.reduce_motion_seen = [], False
         self.radius = Counter()
@@ -200,6 +222,7 @@ class Linter:
 
     def add(self, rid, path, line_no, snippet, lines=None):
         if rid in self.allow:
+            self.allow_hits.add(rid)
             return
         if lines is not None and line_no:
             ctx = " ".join(lines[max(0, line_no - 2): line_no])
@@ -285,6 +308,25 @@ class Linter:
                 hit("marquee", i, ln)
             if re.search(r"typewriter|animate-blink|caret-blink|TypeAnimation|AnimatedTextKit|TypeIt", ln):
                 hit("typewriter", i, ln)
+            if re.search(r"transition(-property)?\s*:[^;{}]*\b(width|height|top|left|right|bottom|margin[\w-]*|padding[\w-]*)\b", low) \
+                    or re.search(r"\btransition-\[(width|height|top|left|margin|padding)", low):
+                hit("layout-animation", i, ln)
+            if re.search(r"outline\s*:\s*(none|0)\b|\boutline-none\b|focus:outline-none", low):
+                hit("outline-none", i, ln, count_only=True)
+            if re.search(r"focus-visible|focus:ring|focus-visible:|:focus\s*\{[^}]*(outline|box-shadow|ring)", low):
+                counts["focus-style"] += 1
+            if re.search(r"\bhover:(bg|text|border)-", ln) and "transition" not in ln:
+                hit("hover-no-transition", i, ln, count_only=True)
+            if re.search(r"<(div|span|li|img)\b[^>]*\bon(click|Click)\s*=", ln) and not re.search(r"\brole\s*=|tabIndex|tabindex", ln):
+                hit("clickable-div", i, ln)
+            if re.search(r"set(Interval|Timeout)\s*\(", ln) and re.search(r"\.style\.|classList\.|opacity|transform|setState\(|set[A-Z]\w*\((prev|p|i|n|x)\s*=>", ln) \
+                    and not re.search(r"debounce|throttle|fetch|poll|retry|abort|toast|clearTimeout", ln):
+                hit("timer-animation", i, ln)
+            if re.search(r"animation(-iteration-count)?\s*:[^;{}]*\binfinite\b|\banimate-(spin|ping|pulse)\b|repeat:\s*Infinity|\.repeatForever\(|repeat\(\s*reverse", ln) \
+                    and not re.search(r"spin|loader|loading|progress|skeleton", low.replace("animate-spin", "")):
+                hit("perpetual-motion", i, ln)
+            if re.search(r"scale\(\s*0\s*\)|\bscale:\s*0\s*[,}]|\bscale-0\b|scaleX?Y?\s*:\s*0\s*[,}]", ln):
+                hit("scale-from-zero", i, ln)
             if re.search(r"(group-)?hover:scale-1(0[2-9]|10)\b", ln) and re.search(r"<img|Image\b|object-cover", ln):
                 hit("hover-image-scale", i, ln)
             fonts = re.findall(r"font-family:\s*([^;}{]+)|family=([A-Za-z+]+)|GoogleFonts\.([a-zA-Z]+)|from ['\"]next/font/google['\"]|import\s*{\s*([A-Za-z_, ]+)\s*}\s*from ['\"]next/font/google|\.custom\(\"([^\"]+)\"|fontFamily:\s*\[?['\"]([^'\"]+)", ln)
@@ -364,6 +406,10 @@ class Linter:
             self.add("glass-overuse", path, firsts["glass-overuse"][0], f"{counts['glass-overuse']} glass/blur surfaces", lines)
         if counts["entrance-spam"] >= 4:
             self.add("entrance-spam", path, firsts["entrance-spam"][0], f"{counts['entrance-spam']} entrance animations", lines)
+        if counts["outline-none"] and not counts["focus-style"]:
+            self.add("outline-none", path, *firsts["outline-none"], lines)
+        if counts["hover-no-transition"] >= 3:
+            self.add("hover-no-transition", path, firsts["hover-no-transition"][0], f"{counts['hover-no-transition']} hover color changes without transition", lines)
         if counts["safe-accent"] >= 2 and "safe-accent" not in [f["rule"] for f in self.findings if f["file"] == str(path)]:
             self.add("safe-accent", path, firsts["safe-accent"][0], "default indigo/emerald primary buttons", lines)
         distinct_buzz = len([k for k in counts if k.startswith("_buzz:")])
@@ -386,6 +432,33 @@ class Linter:
             self.add("same-shadow", "(project)", 0, f"{self.shadow_count} identical soft shadows")
 
 
+HEX = re.compile(r"#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})\b")
+DRIFT_EXTS = {".css", ".scss", ".sass", ".less", ".html", ".htm", ".jsx", ".tsx", ".vue", ".svelte", ".astro",
+              ".js", ".ts", ".dart", ".swift", ".kt"}
+
+
+def norm_hex(h):
+    h = h.lower()
+    return "".join(c * 2 for c in h) if len(h) == 3 else h
+
+
+def token_hexes(design_md: Path):
+    text = design_md.read_text(encoding="utf-8", errors="ignore")
+    return {norm_hex(h) for h in HEX.findall(text)} | {m.lower()[2:] for m in re.findall(r"0x[fF]{2}([0-9a-fA-F]{6})", text)}
+
+
+def lint_drift(L, path: Path, tokens: set):
+    if path.suffix.lower() not in DRIFT_EXTS:
+        return
+    lines = path.read_text(encoding="utf-8", errors="ignore").splitlines()
+    for i, ln in enumerate(lines, 1):
+        found = [norm_hex(h) for h in HEX.findall(ln)] + [h.lower() for h in re.findall(r"0x[fF]{2}([0-9a-fA-F]{6})", ln)]
+        for h in found:
+            if h not in tokens and h not in {"ffffff", "000000"}:
+                L.add("token-drift", path, i, ln, lines)
+                break
+
+
 def collect(paths):
     for p in paths:
         p = Path(p)
@@ -403,6 +476,8 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("paths", nargs="+")
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--github", action="store_true", help="emit GitHub Actions annotations")
+    ap.add_argument("--tokens", help="DESIGN.md whose hex colors are the allowed palette")
     ap.add_argument("--allow", nargs="*", default=[], help="rule ids allowed by the brief")
     ap.add_argument("--warn-only", action="store_true", help="never exit non-zero")
     ap.add_argument("--rules", action="store_true", help="print the rule catalog and exit")
@@ -416,16 +491,27 @@ def main():
         if cand.is_file():
             allow.update(json.loads(cand.read_text()))
     L = Linter(allow)
+    tokens = token_hexes(Path(a.tokens)) if a.tokens else None
     n = 0
     for f in collect(a.paths):
         L.lint_file(f)
+        if tokens is not None and f.resolve() != Path(a.tokens).resolve():
+            lint_drift(L, f, tokens)
         n += 1
     L.finish()
+    stale = sorted(k for k in allow if k not in L.allow_hits and allow[k] != "cli")
     fails = [f for f in L.findings if f["severity"] == "fail"]
     warns = [f for f in L.findings if f["severity"] == "warn"]
     if a.json:
         print(json.dumps({"files": n, "fail": len(fails), "warn": len(warns), "findings": L.findings,
-                          "allowed": allow}, indent=2))
+                          "allowed": allow, "stale_allowances": stale}, indent=2))
+    elif a.github:
+        for f in L.findings:
+            level = "error" if f["severity"] == "fail" else "warning"
+            loc = "" if f["file"].startswith("(") else f"file={f['file']},line={f['line'] or 1},"
+            print(f"::{level} {loc}title=slop_lint {f['rule']}::{R[f['rule']].why}. Instead: {R[f['rule']].instead}")
+        for k in stale:
+            print(f"::warning title=slop_lint stale allowance::'{k}' suppressed nothing; remove it from .design/slop-allow.json")
     else:
         by = defaultdict(list)
         for f in L.findings:
@@ -442,6 +528,8 @@ def main():
                 print(f"      ... {len(by[rid]) - 6} more")
         if allow:
             print("\nallowed by brief:", ", ".join(f"{k} ({v})" for k, v in allow.items()))
+        if stale:
+            print("stale allowances (suppressed nothing; remove or re-scope):", ", ".join(stale))
         print(f"\nslop_lint: {n} files, {len(fails)} FAIL, {len(warns)} WARN"
               + ("  -> PASS (review warnings)" if not fails else "  -> FIX the FAILs and re-run"))
     sys.exit(0 if (a.warn_only or not fails) else 1)
